@@ -30,6 +30,11 @@ public class BoardNode : MonoBehaviour
 		
 	}
 
+	public bool IsActive()
+	{
+		return active;
+	}
+
 	public void Deactivate()
 	{
 		active = false;
@@ -69,6 +74,11 @@ public class BoardNode : MonoBehaviour
 	public void SetColor(Color color)
 	{
 		renderer.material.color = color;
+	}
+
+	public void SetDefaultColor(Color color)
+	{
+		defaultColor = color;
 	}
 
 	// Gets the default color assigned to this node
