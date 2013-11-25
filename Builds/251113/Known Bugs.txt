@@ -1,0 +1,16 @@
+Movement:
+   - The two bottom nodes of "cornered" blocks can be moved out of bounds. 
+     Need to add safety calculation for this not to happen.
+
+XXXX
+XXXX
+  XX
+  XX  <--- These two nodes can be moved one node x/y out of bounds
+           regardless of current rotation.
+
+
+
+Spawning: 
+   - First "Placeable" Block spawned is not shown (same as last build). 
+     Reason for occurance still unknown.
+     Workaround: Press "ENTER" to spawn new block. This will not affect the board in any way.

@@ -25,9 +25,6 @@ public class PlaceableBlock : MonoBehaviour
 		rb = GetComponent<RandomizeBlock>();
 		blockSize = rb.GetShape();
 
-		// Set the color of this block
-		//renderer.material.color = colors[Random.Range(0, colors.Length)];
-
 		// Get the array of nodes that are on the board
 		nodeArray = GameObject.Find("board").GetComponent<DivideBoardIntoNodes>().GetNodes();
 
@@ -38,12 +35,10 @@ public class PlaceableBlock : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		/*
 		if(Input.GetKeyDown(KeyCode.Space))
 		{
-			transform.Rotate(new Vector3(0, 0, 90));
+			Rotate();
 		}
-		*/
 
 		if(Input.GetKeyDown(KeyCode.Return))
 		{
@@ -107,8 +102,8 @@ public class PlaceableBlock : MonoBehaviour
 			if(newX < 19 && newX >= 0
 			   && newY < 10 && newY >= 0)
 			{
-				nodesToBeOccupied.Add(nodeArray[currentX + x, currentY + y]);
-				nodeArray[currentX + x, currentY + y].GetComponent<BoardNode>().Select();
+				nodesToBeOccupied.Add(nodeArray[newX, newY]);
+				nodeArray[newX, newY].GetComponent<BoardNode>().Select();
 			}
 			else
 			{
@@ -162,6 +157,86 @@ public class PlaceableBlock : MonoBehaviour
 			nodeArray[1, 3].GetComponent<BoardNode>().UnSelect();
 		}
 
+	}
+
+	void Rotate()
+	{
+		GameObject pivotNode = occupiedNodes[0];
+		Vector2 pivotNodePosition = pivotNode.GetComponent<BoardNode>().GetPosition();
+
+		List<GameObject> nodesToBeOccupied = new List<GameObject>();
+
+		// Calculate new nodes to be occupied (except pivotNode)
+		foreach(GameObject node in occupiedNodes)
+		{
+			if(node != pivotNode)
+			{
+				Vector2 nodePosition = node.GetComponent<BoardNode>().GetPosition();
+				int newX = 0;
+				int newY = 0;
+
+				// Calculate new position of node (node to be selected after rotation)
+				if((nodePosition.x > pivotNodePosition.x && nodePosition.y == pivotNodePosition.y)
+				   || (nodePosition.x < pivotNodePosition.x && nodePosition.y == pivotNodePosition.y))
+				{
+					newX = (int)pivotNodePosition.x;
+					newY = (int)(pivotNodePosition.y + (nodePosition.x - pivotNodePosition.x));
+				}
+				else if((nodePosition.x > pivotNodePosition.x && nodePosition.y > pivotNodePosition.y)
+				        || (nodePosition.x < pivotNodePosition.x && nodePosition.y > pivotNodePosition.y)
+				        || (nodePosition.x > pivotNodePosition.x && nodePosition.y < pivotNodePosition.y)
+				        || (nodePosition.x < pivotNodePosition.x && nodePosition.y < pivotNodePosition.y))
+				{
+					newX = (int)(pivotNodePosition.x - (nodePosition.y - pivotNodePosition.y));
+					newY = (int)(pivotNodePosition.y + (nodePosition.x - pivotNodePosition.x));
+				}
+				else if((nodePosition.y > pivotNodePosition.y && nodePosition.x == pivotNodePosition.x)
+				        || (nodePosition.y < pivotNodePosition.y && nodePosition.x == pivotNodePosition.x))
+				{
+					newX = (int)(pivotNodePosition.x - (nodePosition.y - pivotNodePosition.y));
+					newY = (int)pivotNodePosition.y;
+				}
+
+				// Check if node will be out of bounds after rotating
+				if(newX < 19 && newX >= 0
+				   && newY < 10 && newY >= 0)
+				{
+					nodesToBeOccupied.Add(nodeArray[newX, newY]);
+				}
+				else
+				{
+					//print (node.name + " OUT OF BOUNDS! " + new Vector2(newX, newY));
+					return;
+				}
+			}
+		}
+
+		// Unselect "old" nodes (except pivotNode)
+		foreach(GameObject node in occupiedNodes)
+		{
+			if(node != pivotNode)
+			{
+				if(!nodesToBeOccupied.Contains(node))
+				{
+					node.GetComponent<BoardNode>().UnSelect();
+				}
+			}
+		}
+		
+		// Clear and set the new List of nodes that are occupied
+		occupiedNodes.Clear();
+		occupiedNodes.Add(pivotNode);
+
+		foreach(GameObject node in nodesToBeOccupied)
+		{
+			occupiedNodes.Add(node);
+		}
+
+		// Select() all newly occupied nodes
+		foreach(GameObject node in occupiedNodes)
+		{
+			node.GetComponent<BoardNode>().Select();
+		}
 	}
 
 	public Vector2 GetSize()

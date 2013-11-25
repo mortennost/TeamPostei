@@ -7,7 +7,7 @@ public class BoardNode : MonoBehaviour
 	public Color[] colors;
 
 	bool selected = false;
-	bool active = true;
+	bool isActive = true;
 
 	Color selectedColor = Color.black;
 	Color defaultColor;
@@ -32,12 +32,12 @@ public class BoardNode : MonoBehaviour
 
 	public bool IsActive()
 	{
-		return active;
+		return isActive;
 	}
 
 	public void Deactivate()
 	{
-		active = false;
+		isActive = false;
 	}
 
 	public bool IsSelected()
@@ -56,7 +56,7 @@ public class BoardNode : MonoBehaviour
 	{
 		selected = false;
 
-		if(active)
+		if(isActive)
 		{
 			SetColor(defaultColor);
 		}
