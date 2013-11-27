@@ -7,6 +7,13 @@ public class RandomizeBlock : MonoBehaviour
 	public Color[] colors;
 	public Vector2[] shapes;
 	public Sprite[] sprites;
+	public Sprite[] blueSprites;
+	public Sprite[] greenSprites;
+	public Sprite[] pinkSprites;
+	public Sprite[] redSprites;
+	public Sprite[] yellowSprites;
+
+	Color color;
 
 	SpriteRenderer sr;
 	
@@ -18,7 +25,8 @@ public class RandomizeBlock : MonoBehaviour
 	{
 		sr = GetComponent<SpriteRenderer>();
 
-		sr.color = colors[Random.Range(0, colors.Length)];
+		color = colors[Random.Range(0, colors.Length)];
+		//sr.color = colors[Random.Range(0, colors.Length)];
 		SetSprite(Random.Range(0, shapes.Length));
 	}
 	
@@ -41,7 +49,23 @@ public class RandomizeBlock : MonoBehaviour
 		}
 
 		selectedShape = shapes[element];
-		sr.sprite = sprites[element];
+
+		if(color == colors[0])
+			sr.sprite = blueSprites[element];
+
+		else if(color == colors[1])
+			sr.sprite = greenSprites[element];
+
+		else if(color == colors[2])
+			sr.sprite = pinkSprites[element];
+
+		else if(color == colors[3])
+			sr.sprite = redSprites[element];
+
+		else if(color == colors[4])
+			sr.sprite = yellowSprites[element];
+
+		//sr.sprite = sprites[element];
 	}
 
 	public void GetNextBlockInfo()
@@ -49,7 +73,8 @@ public class RandomizeBlock : MonoBehaviour
 		if(nextBlock != null)
 		{
 			RandomizeBlock next = nextBlock.GetComponent<RandomizeBlock>();
-			sr.color = next.sr.color;
+			//sr.color = next.sr.color;
+			color = next.GetColor();
 			sr.sprite = next.sr.sprite;
 			selectedShape = next.selectedShape;
 			cornered = next.cornered;
@@ -58,7 +83,8 @@ public class RandomizeBlock : MonoBehaviour
 		else
 		{
 			SetSprite(Random.Range(0, shapes.Length));
-			sr.color = colors[Random.Range(0, colors.Length)]; 
+			//sr.color = colors[Random.Range(0, colors.Length)]; 
+			color = colors[Random.Range(0, colors.Length)]; 
 		}
 	}
 
@@ -70,5 +96,15 @@ public class RandomizeBlock : MonoBehaviour
 	public Vector2 GetShape()
 	{
 		return selectedShape;
+	}
+
+	public void SetColor(Color newColor)
+	{
+		color = newColor;
+	}
+
+	public Color GetColor()
+	{
+		return color;
 	}
 }

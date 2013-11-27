@@ -55,15 +55,16 @@ public class BoardNode : MonoBehaviour
 	public void UnSelect()
 	{
 		selected = false;
+		SetColor(defaultColor);
 
-		if(isActive)
+		/*if(isActive)
 		{
 			SetColor(defaultColor);
 		}
 		else
 		{
 			SetColor(Color.white);
-		}
+		}*/
 	}
 
 	public void SetPosition(int x, int y)

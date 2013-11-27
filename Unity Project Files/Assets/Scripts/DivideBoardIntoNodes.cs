@@ -24,8 +24,8 @@ public class DivideBoardIntoNodes : MonoBehaviour
 	{
 		boardSprite = GetComponent<SpriteRenderer>().sprite;
 
-		nodeSizeX = boardSprite.bounds.size.x / maxNodesX;
-		nodeSizeY = boardSprite.bounds.size.y / maxNodesY;
+		nodeSizeX = (boardSprite.bounds.size.x * transform.localScale.x) / maxNodesX;
+		nodeSizeY = (boardSprite.bounds.size.y * transform.localScale.y) / maxNodesY;
 
 		//print ("x = " + nodeSizeX + " | y = " + nodeSizeY);
 		for(int i = 0; i < maxNodesX; i++)

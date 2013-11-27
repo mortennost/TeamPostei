@@ -18,6 +18,25 @@ public class PlaceableBlock : MonoBehaviour
 	SpriteRenderer sr;
 	RandomizeBlock rb;
 
+	float timeUntilNextInputUpdate = 0.1f;
+	float inputTimer = 0.0f;
+
+	int playerPoints = 0;
+	int nextPointMilestone;
+	int milestonesHit = 0;
+
+	GameObject pointsText;
+	GameObject milestoneText;
+	GameObject rewardText;
+	GameObject startText;
+	SpriteRenderer reward;
+	Color rewardColor;
+	float rewardAlpha = 255.0f;
+
+	bool showReward = false;
+	float timeToShowReward = 5.0f;
+	float rewardTimer = 0.0f;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -30,59 +49,161 @@ public class PlaceableBlock : MonoBehaviour
 
 		// "Spawn" block by setting which nodes to occupy
 		Spawn();
+
+		pointsText = GameObject.Find("PointsText");
+		milestoneText = GameObject.Find("MilestoneText");
+		rewardText = GameObject.Find("RewardText");
+		startText = GameObject.Find("StartText");
+		reward = GameObject.Find("Reward").GetComponent<SpriteRenderer>();
+		rewardColor = reward.color;
+
+		nextPointMilestone = 2000;
+		pointsText.guiText.text = "Points: " + playerPoints;
+		milestoneText.guiText.text = "Next Milestone: " + nextPointMilestone;
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		if(Input.GetKeyDown(KeyCode.Space))
+		if(!showReward)
 		{
-			Rotate();
-		}
+			if(playerPoints >= nextPointMilestone)
+			{
+				milestonesHit++;
+				nextPointMilestone += 2000;
+				milestoneText.guiText.text = "Next Milestone: " + nextPointMilestone;
+				showReward = true;
+			}
+			
+			inputTimer += Time.deltaTime;
+			
+			if(Input.GetKeyDown(KeyCode.Space))
+			{
+				Rotate();
+			}
+			
+			if(Input.GetKeyDown(KeyCode.Return))
+			{
+				if(startText.guiText.enabled)
+				{
+					startText.guiText.enabled = false;
+					pointsText.guiText.enabled = true;
+					milestoneText.guiText.enabled = true;
+				}
 
-		if(Input.GetKeyDown(KeyCode.Return))
-		{
-			PlaceBlock();
-			rb.GetNextBlockInfo();
-			Spawn();
+				PlaceBlock();
+				rb.GetNextBlockInfo();
+				Spawn();
+			}
+			
+			if(inputTimer >= timeUntilNextInputUpdate)
+			{
+				inputTimer = 0.0f;
+				if(Input.GetKey(KeyCode.W))
+				{
+					Move(0, -1);
+				}
+				
+				if(Input.GetKey(KeyCode.A))
+				{
+					Move(-1, 0);
+				}
+				
+				if(Input.GetKey(KeyCode.S))
+				{
+					Move(0, 1);
+				}
+				
+				if(Input.GetKey(KeyCode.D))
+				{
+					Move(1, 0);
+				}
+			}
 		}
+		else
+		{
+			if(milestonesHit < 6)
+			{
+				rewardTimer += Time.deltaTime;
+				
+				if(rewardTimer < timeToShowReward)
+				{
+					ShowReward(true);
+					pointsText.guiText.enabled = false;
+					milestoneText.guiText.enabled = false;
+					rewardAlpha /= rewardTimer;
+					reward.color = new Color(rewardColor.r, rewardColor.g, rewardColor.b, rewardAlpha);
+				}
+				else
+				{
+					ShowReward(false);
+					showReward = false;
+					rewardTimer = 0.0f;
+					pointsText.guiText.enabled = true;
+					milestoneText.guiText.enabled = true;
+				}
+			}
+			else
+			{
+				if(!reward.enabled)
+				{
+					reward.enabled = true;
+					rewardText.guiText.enabled = true;
+					pointsText.guiText.enabled = false;
+					milestoneText.guiText.enabled = false;
+					rewardText.guiText.text = "Congratulations! You have completed the game! \nPress [ENTER] to start a new game!";
+				}
 
-		if(Input.GetKeyDown(KeyCode.W))
-		{
-			Move(0, -1);
+				if(Input.GetKeyDown(KeyCode.Return))
+				{
+					Application.LoadLevel(0);
+				}
+			}
 		}
-		
-		if(Input.GetKeyDown(KeyCode.A))
-		{
-			Move(-1, 0);
-		}
-		
-		if(Input.GetKeyDown(KeyCode.S))
-		{
-			Move(0, 1);
-		}
+	}
 
-		if(Input.GetKeyDown(KeyCode.D))
+	void ShowReward(bool show)
+	{
+		if(show)
 		{
-			Move(1, 0);
+			if(!reward.enabled)
+			{
+				reward.enabled = true;
+				rewardText.guiText.enabled = true;
+				rewardText.guiText.text = "Congratulations! You received reward " + milestonesHit + " of 6. \nPrepare for the next round!";
+				//print("Picture: " + milestonesHit + " of 6");
+			}
+		}
+		else
+		{
+			reward.color = new Color(rewardColor.r, rewardColor.g, rewardColor.b, 255.0f);
+			reward.enabled = false;
+			rewardText.guiText.enabled = false;
 		}
 	}
 
 	void PlaceBlock()
 	{
+		int numOfBlocksToGivePoints = 0;
+
 		foreach(GameObject node in occupiedNodes)
 		{
 			BoardNode bn = node.GetComponent<BoardNode>();
 
-			if(bn.GetDefaultColor() == sr.color)
+			if(bn.GetDefaultColor() == rb.GetColor()/*sr.color*/)
 			{
-				bn.Deactivate();
+				//bn.Deactivate();
+				bn.SetDefaultColor(Color.white);
+				numOfBlocksToGivePoints++;
 			}
-			else if(bn.IsActive())
+			else //if(bn.IsActive())
 			{
-				bn.SetDefaultColor(sr.color);
+				bn.SetDefaultColor(rb.GetColor()/*sr.color*/);
 			}
 		}
+
+		playerPoints += 100 * numOfBlocksToGivePoints;
+		pointsText.guiText.text = "Points: " + playerPoints;
 	}
 
 	void Move(int x, int y)
