@@ -28,6 +28,7 @@ public class PlaceableBlock : MonoBehaviour
 	GameObject milestoneText;
 	GameObject rewardText;
 	GameObject startText;
+	GameObject currentText;
 	SpriteRenderer reward;
 	Color rewardColor;
 	float rewardAlpha = 255.0f;
@@ -35,6 +36,10 @@ public class PlaceableBlock : MonoBehaviour
 	bool showReward = false;
 	float timeToShowReward = 5.0f;
 	float rewardTimer = 0.0f;
+
+	public AudioSource moveSound;
+
+	public GameObject[] rewardObjects;
 
 	// Use this for initialization
 	void Start () 
@@ -54,6 +59,7 @@ public class PlaceableBlock : MonoBehaviour
 		rewardText = GameObject.Find("RewardText");
 		startText = GameObject.Find("StartText");
 		reward = GameObject.Find("Reward").GetComponent<SpriteRenderer>();
+		currentText = GameObject.Find("Current:");
 		rewardColor = reward.color;
 
 		nextPointMilestone = 2000;
@@ -126,11 +132,22 @@ public class PlaceableBlock : MonoBehaviour
 				
 				if(rewardTimer < timeToShowReward)
 				{
+					for(int i = 0; i < rewardObjects.Length; i++)
+					{
+						rewardObjects[i].GetComponent<SpriteRenderer>().enabled = true;
+					}
+
+					for(int i = 0; i < milestonesHit; i++)
+					{
+						rewardObjects[i].GetComponent<SpriteRenderer>().enabled = false;
+					}
+
 					ShowReward(true);
 					pointsText.guiText.enabled = false;
 					milestoneText.guiText.enabled = false;
-					rewardAlpha /= rewardTimer;
-					reward.color = new Color(rewardColor.r, rewardColor.g, rewardColor.b, rewardAlpha);
+					currentText.guiText.enabled = false;
+					//rewardAlpha /= rewardTimer;
+					//reward.color = new Color(rewardColor.r, rewardColor.g, rewardColor.b, rewardAlpha);
 				}
 				else
 				{
@@ -139,6 +156,12 @@ public class PlaceableBlock : MonoBehaviour
 					rewardTimer = 0.0f;
 					pointsText.guiText.enabled = true;
 					milestoneText.guiText.enabled = true;
+					currentText.guiText.enabled = true;
+
+					for(int i = 0; i < rewardObjects.Length; i++)
+					{
+						rewardObjects[i].GetComponent<SpriteRenderer>().enabled = false;
+					}
 				}
 			}
 			else
@@ -149,10 +172,16 @@ public class PlaceableBlock : MonoBehaviour
 					rewardText.guiText.enabled = true;
 					pointsText.guiText.enabled = false;
 					milestoneText.guiText.enabled = false;
-					rewardText.guiText.text = "Congratulations! You have completed the game! \nPress [ENTER] to start a new game!";
+					currentText.guiText.enabled = false;
+					rewardText.guiText.text = "Congratulations! You have completed the game! \nPress [SPACE] to start a new game!";
+
+					for(int i = 0; i < rewardObjects.Length; i++)
+					{
+						rewardObjects[i].GetComponent<SpriteRenderer>().enabled = false;
+					}
 				}
 
-				if(Input.GetKeyDown(KeyCode.Return))
+				if(Input.GetKeyDown(KeyCode.Space))
 				{
 					Application.LoadLevel(0);
 				}
@@ -242,6 +271,7 @@ public class PlaceableBlock : MonoBehaviour
 
 		// Set the new List of nodes that are occupied
 		occupiedNodes = nodesToBeOccupied;
+		moveSound.Play();
 	}
 
 	void Spawn()
