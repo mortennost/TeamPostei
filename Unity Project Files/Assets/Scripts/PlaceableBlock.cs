@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class PlaceableBlock : MonoBehaviour 
 {
-	public GameObject nextBlock;
 	public Color[] colors;
 
 	Vector2 blockSize = new Vector2(2f, 2f);
@@ -48,7 +47,7 @@ public class PlaceableBlock : MonoBehaviour
 		nodeArray = GameObject.Find("board").GetComponent<DivideBoardIntoNodes>().GetNodes();
 
 		// "Spawn" block by setting which nodes to occupy
-		Spawn();
+		//Spawn();
 
 		pointsText = GameObject.Find("PointsText");
 		milestoneText = GameObject.Find("MilestoneText");
@@ -92,7 +91,6 @@ public class PlaceableBlock : MonoBehaviour
 				}
 
 				PlaceBlock();
-				rb.GetNextBlockInfo();
 				Spawn();
 			}
 			
@@ -204,6 +202,7 @@ public class PlaceableBlock : MonoBehaviour
 
 		playerPoints += 100 * numOfBlocksToGivePoints;
 		pointsText.guiText.text = "Points: " + playerPoints;
+		rb.GetNextBlockInfo();
 	}
 
 	void Move(int x, int y)

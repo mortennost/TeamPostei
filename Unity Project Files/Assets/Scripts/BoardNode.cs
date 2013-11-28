@@ -74,6 +74,11 @@ public class BoardNode : MonoBehaviour
 
 	public void SetColor(Color color)
 	{
+		/*renderer.material.color = new Color(Mathf.Lerp(renderer.material.color.r, color.r, 0.3f),
+		                                    Mathf.Lerp(renderer.material.color.g, color.g, 0.3f),
+		                                    Mathf.Lerp(renderer.material.color.b, color.b, 0.3f),
+		                                    Mathf.Lerp(renderer.material.color.a, color.a, 0.3f));*/
+
 		renderer.material.color = color;
 	}
 

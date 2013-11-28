@@ -74,7 +74,7 @@ public class RandomizeBlock : MonoBehaviour
 		{
 			RandomizeBlock next = nextBlock.GetComponent<RandomizeBlock>();
 			//sr.color = next.sr.color;
-			color = next.GetColor();
+			color = next.color;
 			sr.sprite = next.sr.sprite;
 			selectedShape = next.selectedShape;
 			cornered = next.cornered;
@@ -82,9 +82,10 @@ public class RandomizeBlock : MonoBehaviour
 		}
 		else
 		{
+			color = colors[Random.Range(0, colors.Length)];
 			SetSprite(Random.Range(0, shapes.Length));
-			//sr.color = colors[Random.Range(0, colors.Length)]; 
-			color = colors[Random.Range(0, colors.Length)]; 
+
+			//SetColor(colors[Random.Range(0, colors.Length)]); 
 		}
 	}
 
