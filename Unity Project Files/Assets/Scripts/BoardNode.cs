@@ -15,7 +15,7 @@ public class BoardNode : MonoBehaviour
 	void Awake()
 	{
 		defaultColor = colors[Random.Range(0, colors.Length)];
-		SetColor(defaultColor);
+		SetColor(Color.Lerp(Color.white, defaultColor, 0.8f));
 	}
 
 	// Use this for initialization
@@ -48,14 +48,14 @@ public class BoardNode : MonoBehaviour
 	public void Select()
 	{
 		selected = true;
-		SetColor(selectedColor);
+		SetColor(Color.Lerp(selectedColor, defaultColor, 0.6f));
 		//print ("SELECTED: " + position.x + ", " + position.y);
 	}
 
 	public void UnSelect()
 	{
 		selected = false;
-		SetColor(defaultColor);
+		SetColor(Color.Lerp(Color.white, defaultColor, 0.8f));
 
 		/*if(isActive)
 		{

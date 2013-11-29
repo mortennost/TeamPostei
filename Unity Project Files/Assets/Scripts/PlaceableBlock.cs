@@ -13,6 +13,8 @@ public class PlaceableBlock : MonoBehaviour
 
 	int currentX = 0;
 	int currentY = 0;
+	int startX = 8;
+	int startY = 4;
 
 	SpriteRenderer sr;
 	RandomizeBlock rb;
@@ -31,13 +33,20 @@ public class PlaceableBlock : MonoBehaviour
 	GameObject currentText;
 	SpriteRenderer reward;
 	Color rewardColor;
-	float rewardAlpha = 255.0f;
+	//float rewardAlpha = 255.0f;
 
 	bool showReward = false;
 	float timeToShowReward = 5.0f;
 	float rewardTimer = 0.0f;
 
+	bool canPlayBlocked = true;
+	float blockedCooldown = 0.5f;
+	float blockedCooldownTimer = 0.0f;
+
 	public AudioSource moveSound;
+	public AudioSource placeSound;
+	public AudioSource rotateSound;
+	public AudioSource blockedSound;
 
 	public GameObject[] rewardObjects;
 
@@ -63,8 +72,8 @@ public class PlaceableBlock : MonoBehaviour
 		rewardColor = reward.color;
 
 		nextPointMilestone = 2000;
-		pointsText.guiText.text = "Points: " + playerPoints;
-		milestoneText.guiText.text = "Next Milestone: " + nextPointMilestone;
+		pointsText.guiText.text = "Poeng: " + playerPoints;
+		milestoneText.guiText.text = "Neste Mål: " + nextPointMilestone;
 	}
 	
 	// Update is called once per frame
@@ -72,11 +81,22 @@ public class PlaceableBlock : MonoBehaviour
 	{
 		if(!showReward)
 		{
+			if(!canPlayBlocked)
+			{
+				blockedCooldownTimer += Time.deltaTime;
+
+				if(blockedCooldownTimer >= blockedCooldown)
+				{
+					canPlayBlocked = true;
+					blockedCooldownTimer = 0.0f;
+				}
+			}
+
 			if(playerPoints >= nextPointMilestone)
 			{
 				milestonesHit++;
 				nextPointMilestone += 2000;
-				milestoneText.guiText.text = "Next Milestone: " + nextPointMilestone;
+				milestoneText.guiText.text = "Neste Mål: " + nextPointMilestone;
 				showReward = true;
 			}
 			
@@ -103,22 +123,22 @@ public class PlaceableBlock : MonoBehaviour
 			if(inputTimer >= timeUntilNextInputUpdate)
 			{
 				inputTimer = 0.0f;
-				if(Input.GetKey(KeyCode.W))
+				if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
 				{
 					Move(0, -1);
 				}
 				
-				if(Input.GetKey(KeyCode.A))
+				if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 				{
 					Move(-1, 0);
 				}
 				
-				if(Input.GetKey(KeyCode.S))
+				if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
 				{
 					Move(0, 1);
 				}
 				
-				if(Input.GetKey(KeyCode.D))
+				if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
 				{
 					Move(1, 0);
 				}
@@ -173,7 +193,7 @@ public class PlaceableBlock : MonoBehaviour
 					pointsText.guiText.enabled = false;
 					milestoneText.guiText.enabled = false;
 					currentText.guiText.enabled = false;
-					rewardText.guiText.text = "Congratulations! You have completed the game! \nPress [SPACE] to start a new game!";
+					rewardText.guiText.text = "Gratulerer! Du vant! \nTrykk [ESCAPE] for å laste ned vinnerbildet! \nTrykk [SPACE] for å starte spillet på nytt!";
 
 					for(int i = 0; i < rewardObjects.Length; i++)
 					{
@@ -184,6 +204,10 @@ public class PlaceableBlock : MonoBehaviour
 				if(Input.GetKeyDown(KeyCode.Space))
 				{
 					Application.LoadLevel(0);
+				}
+				if(Input.GetKeyDown(KeyCode.Escape))
+				{
+					Application.OpenURL("http://mattisdelerud.com/nothingOfTheKind/gratulererDuKlarteDetJo1920.jpg");
 				}
 			}
 		}
@@ -197,7 +221,7 @@ public class PlaceableBlock : MonoBehaviour
 			{
 				reward.enabled = true;
 				rewardText.guiText.enabled = true;
-				rewardText.guiText.text = "Congratulations! You received reward " + milestonesHit + " of 6. \nPrepare for the next round!";
+				rewardText.guiText.text = "Gratulerer! Du har vunnet del " + milestonesHit + " av 6. \nGjør deg klar for neste runde!";
 				//print("Picture: " + milestonesHit + " of 6");
 			}
 		}
@@ -212,6 +236,7 @@ public class PlaceableBlock : MonoBehaviour
 	void PlaceBlock()
 	{
 		int numOfBlocksToGivePoints = 0;
+		int pointsThisBlock = 0;
 
 		foreach(GameObject node in occupiedNodes)
 		{
@@ -229,9 +254,54 @@ public class PlaceableBlock : MonoBehaviour
 			}
 		}
 
-		playerPoints += 100 * numOfBlocksToGivePoints;
-		pointsText.guiText.text = "Points: " + playerPoints;
+		switch(numOfBlocksToGivePoints)
+		{
+		case 0:
+			pointsThisBlock = 0;
+			break;
+		case 1:
+			pointsThisBlock = 1;
+			break;
+		case 2:
+			pointsThisBlock = 2;
+			break;
+		case 3:
+			pointsThisBlock = 4;
+			break;
+		case 4:
+			pointsThisBlock = 8;
+			break;
+		case 5:
+			pointsThisBlock = 16;
+			break;
+		case 6:
+			pointsThisBlock = 32;
+			break;
+		case 7:
+			pointsThisBlock = 64;
+			break;
+		case 8:
+			pointsThisBlock = 128;
+			break;
+		case 9:
+			pointsThisBlock = 256;
+			break;
+		case 10:
+			pointsThisBlock = 512;
+			break;
+		case 11:
+			pointsThisBlock = 1024;
+			break;
+		case 12:
+			pointsThisBlock = 1337;
+			break;
+		}
+
+		playerPoints += pointsThisBlock;
+
+		pointsText.guiText.text = "Poeng: " + playerPoints;
 		rb.GetNextBlockInfo();
+		placeSound.Play();
 	}
 
 	void Move(int x, int y)
@@ -256,6 +326,12 @@ public class PlaceableBlock : MonoBehaviour
 			}
 			else
 			{
+				if(canPlayBlocked)
+				{
+					blockedSound.Play();
+					canPlayBlocked = false;
+				}
+
 				return;
 			}
 		}
@@ -290,27 +366,30 @@ public class PlaceableBlock : MonoBehaviour
 		{
 			for(int j = 0; j < blockSize.y; j++)
 			{
-				occupiedNodes.Add(nodeArray[i, j]);
-				nodeArray[i, j].GetComponent<BoardNode>().Select();
+				occupiedNodes.Add(nodeArray[startX + i, startY + j]);
+				nodeArray[startX + i, startY + j].GetComponent<BoardNode>().Select();
 			}
 		}
 
 		if(rb.IsCornered())
 		{
-			occupiedNodes.Remove(nodeArray[0, 2]);
-			occupiedNodes.Remove(nodeArray[1, 2]);
-			occupiedNodes.Remove(nodeArray[0, 3]);
-			occupiedNodes.Remove(nodeArray[1, 3]);
-			nodeArray[0, 2].GetComponent<BoardNode>().UnSelect();
-			nodeArray[1, 2].GetComponent<BoardNode>().UnSelect();
-			nodeArray[0, 3].GetComponent<BoardNode>().UnSelect();
-			nodeArray[1, 3].GetComponent<BoardNode>().UnSelect();
+			occupiedNodes.Remove(nodeArray[startX + 0, startY + 2]);
+			occupiedNodes.Remove(nodeArray[startX + 1, startY + 2]);
+			occupiedNodes.Remove(nodeArray[startX + 0, startY + 3]);
+			occupiedNodes.Remove(nodeArray[startX + 1, startY + 3]);
+			nodeArray[startX + 0, startY + 2].GetComponent<BoardNode>().UnSelect();
+			nodeArray[startX + 1, startY + 2].GetComponent<BoardNode>().UnSelect();
+			nodeArray[startX + 0, startY + 3].GetComponent<BoardNode>().UnSelect();
+			nodeArray[startX + 1, startY + 3].GetComponent<BoardNode>().UnSelect();
 		}
 
 	}
 
 	void Rotate()
 	{
+		if(rb.GetShape() == new Vector2(2, 2))
+			return;
+
 		GameObject pivotNode = occupiedNodes[0];
 		Vector2 pivotNodePosition = pivotNode.GetComponent<BoardNode>().GetPosition();
 
@@ -387,6 +466,8 @@ public class PlaceableBlock : MonoBehaviour
 		{
 			node.GetComponent<BoardNode>().Select();
 		}
+
+		rotateSound.Play();
 	}
 
 	public Vector2 GetSize()
