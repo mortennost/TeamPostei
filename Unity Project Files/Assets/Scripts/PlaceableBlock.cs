@@ -25,7 +25,10 @@ public class PlaceableBlock : MonoBehaviour
 	int playerPoints = 0;
 	int nextPointMilestone;
 	int milestonesHit = 0;
+	int draws = 0;
 
+	GameObject drawCounter;
+	GameObject pointsPopup;
 	GameObject pointsText;
 	GameObject milestoneText;
 	GameObject rewardText;
@@ -43,12 +46,16 @@ public class PlaceableBlock : MonoBehaviour
 	float blockedCooldown = 0.5f;
 	float blockedCooldownTimer = 0.0f;
 
+	bool popupEnabled = false;
+	float popupAlpha = 1.0f;
+
 	public AudioSource moveSound;
 	public AudioSource placeSound;
 	public AudioSource rotateSound;
 	public AudioSource blockedSound;
 
 	public GameObject[] rewardObjects;
+	public AudioSource[] milestoneSounds;
 
 	// Use this for initialization
 	void Start () 
@@ -63,6 +70,8 @@ public class PlaceableBlock : MonoBehaviour
 		// "Spawn" block by setting which nodes to occupy
 		//Spawn();
 
+		drawCounter = GameObject.Find("DrawCounter");
+		pointsPopup = GameObject.Find("PointsPopup");
 		pointsText = GameObject.Find("PointsText");
 		milestoneText = GameObject.Find("MilestoneText");
 		rewardText = GameObject.Find("RewardText");
@@ -71,9 +80,10 @@ public class PlaceableBlock : MonoBehaviour
 		currentText = GameObject.Find("Current:");
 		rewardColor = reward.color;
 
-		nextPointMilestone = 2000;
-		pointsText.guiText.text = "Poeng: " + playerPoints;
-		milestoneText.guiText.text = "Neste Mål: " + nextPointMilestone;
+		nextPointMilestone = 1000;
+		pointsText.guiText.text = "POENG: " + playerPoints;
+		milestoneText.guiText.text = "MÅL: " + nextPointMilestone;
+		drawCounter.guiText.text = "TREKK: " + draws;
 	}
 	
 	// Update is called once per frame
@@ -92,11 +102,27 @@ public class PlaceableBlock : MonoBehaviour
 				}
 			}
 
+			if(popupEnabled)
+			{
+				if(popupAlpha > 0.0f)
+				{
+					popupAlpha -= Time.deltaTime / 2f;
+				}
+				else
+				{
+					popupEnabled = false;
+					pointsPopup.guiText.enabled = false;
+				}
+
+				pointsPopup.transform.position = Vector2.Lerp(new Vector2(0.57f, 0.9f), new Vector2(0.57f, 0.7f), popupAlpha);
+				pointsPopup.guiText.color = Color.Lerp(new Color(Color.white.r, Color.white.g, Color.white.b, 0f), Color.white, popupAlpha);
+			}
+
 			if(playerPoints >= nextPointMilestone)
 			{
 				milestonesHit++;
-				nextPointMilestone += 2000;
-				milestoneText.guiText.text = "Neste Mål: " + nextPointMilestone;
+				nextPointMilestone += 1000;
+				milestoneText.guiText.text = "MÅL: " + nextPointMilestone;
 				showReward = true;
 			}
 			
@@ -114,6 +140,12 @@ public class PlaceableBlock : MonoBehaviour
 					startText.guiText.enabled = false;
 					pointsText.guiText.enabled = true;
 					milestoneText.guiText.enabled = true;
+					drawCounter.guiText.enabled = true;
+					draws = 0;
+				}
+				else
+				{
+					draws++;
 				}
 
 				PlaceBlock();
@@ -166,6 +198,7 @@ public class PlaceableBlock : MonoBehaviour
 					pointsText.guiText.enabled = false;
 					milestoneText.guiText.enabled = false;
 					currentText.guiText.enabled = false;
+					drawCounter.guiText.enabled = false;
 					//rewardAlpha /= rewardTimer;
 					//reward.color = new Color(rewardColor.r, rewardColor.g, rewardColor.b, rewardAlpha);
 				}
@@ -177,6 +210,7 @@ public class PlaceableBlock : MonoBehaviour
 					pointsText.guiText.enabled = true;
 					milestoneText.guiText.enabled = true;
 					currentText.guiText.enabled = true;
+					drawCounter.guiText.enabled = true;
 
 					for(int i = 0; i < rewardObjects.Length; i++)
 					{
@@ -193,7 +227,9 @@ public class PlaceableBlock : MonoBehaviour
 					pointsText.guiText.enabled = false;
 					milestoneText.guiText.enabled = false;
 					currentText.guiText.enabled = false;
-					rewardText.guiText.text = "Gratulerer! Du vant! \nTrykk [ESCAPE] for å laste ned vinnerbildet! \nTrykk [SPACE] for å starte spillet på nytt!";
+					pointsPopup.guiText.enabled = false;
+					drawCounter.guiText.enabled = false;
+					rewardText.guiText.text = "Gratulerer! Du vant! Du brukte [" + draws + "] trekk. \nTrykk [SPACE] for å laste ned vinnerbildet! \nTrykk [ENTER] for å starte spillet på nytt!";
 
 					for(int i = 0; i < rewardObjects.Length; i++)
 					{
@@ -201,11 +237,11 @@ public class PlaceableBlock : MonoBehaviour
 					}
 				}
 
-				if(Input.GetKeyDown(KeyCode.Space))
+				if(Input.GetKeyDown(KeyCode.Escape))
 				{
 					Application.LoadLevel(0);
 				}
-				if(Input.GetKeyDown(KeyCode.Escape))
+				if(Input.GetKeyDown(KeyCode.Space))
 				{
 					Application.OpenURL("http://mattisdelerud.com/nothingOfTheKind/gratulererDuKlarteDetJo1920.jpg");
 				}
@@ -297,9 +333,21 @@ public class PlaceableBlock : MonoBehaviour
 			break;
 		}
 
+		if(numOfBlocksToGivePoints > 0)
+		{
+			popupEnabled = true;
+			pointsPopup.guiText.enabled = true;
+			popupAlpha = 1.0f;
+			pointsPopup.guiText.text = "+" + pointsThisBlock;
+
+			AudioSource milestoneSound = milestoneSounds[Random.Range(0, milestoneSounds.Length)];
+			milestoneSound.Play();
+		}
+
 		playerPoints += pointsThisBlock;
 
-		pointsText.guiText.text = "Poeng: " + playerPoints;
+		drawCounter.guiText.text = "TREKK: " + draws;
+		pointsText.guiText.text = "POENG: " + playerPoints;
 		rb.GetNextBlockInfo();
 		placeSound.Play();
 	}
@@ -435,6 +483,7 @@ public class PlaceableBlock : MonoBehaviour
 				else
 				{
 					//print (node.name + " OUT OF BOUNDS! " + new Vector2(newX, newY));
+					blockedSound.Play();
 					return;
 				}
 			}

@@ -8,6 +8,7 @@ public class RandomTextStartScript : MonoBehaviour
 	public GUIText text;
 
 	float alpha = 0.0f;
+	float alphaSecond = 0.0f;
 	Color selectedColor;
 
 	public List<Color> colorsList = new List<Color>();
@@ -27,7 +28,8 @@ public class RandomTextStartScript : MonoBehaviour
 		{
 			alpha += Time.deltaTime / 4f;
 		}
-		text.color = Color.Lerp(Color.black, selectedColor, alpha);
+		
+		text.color = Color.Lerp(Color.black, new Color(selectedColor.r, selectedColor.g, selectedColor.b, 0f), alpha);
 
 		if(!audio.isPlaying)
 		{
